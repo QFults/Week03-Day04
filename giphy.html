@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
 </head>
+
 <body>
   <form>
     <p>
@@ -16,24 +18,40 @@
   </form>
   <hr>
   <div id="buttons"></div>
+  <button id="clear">Clear buttons</button>
   <hr>
   <div id="gifs"></div>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
-    // so6QOTNdmWKPObKhaL11EhE7gGtpiiqG
-    // https://api.giphy.com/v1/gifs/search?api_key=so6QOTNdmWKPObKhaL11EhE7gGtpiiqG&q=dogs&limit=10&rating=g
+    let buttons = JSON.parse(localStorage.getItem('buttons')) || []
+
+    buttons.forEach(button => {
+      let btnElem = document.createElement('button')
+      btnElem.className = 'gifBtn'
+      btnElem.textContent = button
+      document.getElementById('buttons').append(btnElem)
+    })
+    
+    document.getElementById('clear').addEventListener('click', () => {
+      document.getElementById('buttons').innerHTML = ''
+      buttons = []
+      localStorage.setItem('buttons', JSON.stringify(buttons))
+    })
 
     document.getElementById('createBtn').addEventListener('click', event => {
       event.preventDefault()
       let btnElem = document.createElement('button')
-      btnElem.className = 'gif'
+      btnElem.className = 'gifBtn'
       btnElem.textContent = document.getElementById('search').value
       document.getElementById('buttons').append(btnElem)
+
+      buttons.push(document.getElementById('search').value)
+      localStorage.setItem('buttons', JSON.stringify(buttons))
       document.getElementById('search').value = ''
     })
 
     document.addEventListener('click', event => {
-      if (event.target.className === 'gif') {
+      if (event.target.className === 'gifBtn') {
         console.log(event.target.textContent)
         axios.get(`https://api.giphy.com/v1/gifs/search?api_key=so6QOTNdmWKPObKhaL11EhE7gGtpiiqG&q=${event.target.textContent}&limit=10&rating=g`)
           .then(res => {
@@ -42,8 +60,11 @@
             document.getElementById('gifs').innerHTML = ''
             gifs.forEach(gif => {
               let gifElem = document.createElement('img')
+              gifElem.className = 'gif'
               gifElem.src = gif.images.original.url
               gifElem.alt = gif.title
+              gifElem.dataset.still = gif.images.original_still.url
+              gifElem.dataset.animated = gif.images.original.url
               document.getElementById('gifs').append(gifElem)
             })
           })
@@ -51,6 +72,17 @@
       }
     })
 
+    document.addEventListener('click', event => {
+      if (event.target.className === 'gif') {
+        if (event.target.src === event.target.dataset.animated) {
+          event.target.src = event.target.dataset.still
+        } else {
+          event.target.src = event.target.dataset.animated
+        }
+      }
+    })
+
   </script>
 </body>
+
 </html>
