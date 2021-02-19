@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+  <form>
+    <p>
+      <label for="name">artist name</label>
+      <input type="text" name="name" id="name">
+    </p>
+    <button id="search">Search for artist</button>
+  </form>
+  <div id="artist"></div>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=Cher&api_key=f7d32c587e95678ed3ee901e11906af8&format=json
+
+    document.getElementById('search').addEventListener('click', event => {
+      event.preventDefault()
+      let name = document.getElementById('name').value
+      axios.get(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${name}&api_key=f7d32c587e95678ed3ee901e11906af8&format=json`)
+        .then(res => {
+          let artist = res.data.artist
+          console.log(artist)
+          document.getElementById('artist').innerHTML = `
+          <h1>Name: ${artist.name}</h1>
+          <img src="${artist.image[1]['#text']}" alt="${artist.name}">
+          <p>Bio: ${artist.bio.summary}</p>
+        `
+        document.getElementById('name').value = ''
+        })
+        .catch(err => console.error(err))
+    })
+
+    axios.get('https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=Cher&api_key=f7d32c587e95678ed3ee901e11906af8&format=json')
+      .then(res => {
+        let artist = res.data.artist
+        console.log(artist)
+        document.getElementById('artist').innerHTML = `
+          <h1>Name: ${artist.name}</h1>
+          <img src="${artist.image[1]['#text']}" alt="${artist.name}">
+          <p>Bio: ${artist.bio.summary}</p>
+        `
+      })
+      .catch(err => console.error(err))
+  </script>
+</body>
+</html>
